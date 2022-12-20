@@ -74,13 +74,13 @@ networkPolicy:
 
 # also install the nginx ingress helm chart
 nginx:
-  enabled: false
+  enabled: true
 
 ingress:
-  enabled: false
+  enabled: true
   # Used to create an Ingress record.
   hosts:
-    - name: sonarqube.your-org.com
+    - name: sonarqube.deciobarrosjr.com.br
       # Different clouds or configurations might need /* as the default path
       path: /
       # For additional control over serviceName and servicePort
@@ -88,15 +88,15 @@ ingress:
       # servicePort: somePort
       # the pathType can be one of the following values: Exact|Prefix|ImplementationSpecific(default)
       # pathType: ImplementationSpecific
-  annotations: {}
+  annotations:
   # kubernetes.io/ingress.class: nginx
   # kubernetes.io/tls-acme: "true"
   # This property allows for reports up to a certain size to be uploaded to SonarQube
-  # nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+  nginx.ingress.kubernetes.io/proxy-body-size: "8m"
 
   # Set ingressClassName if kubernetes version is >= 1.18
   # Reference: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
-  # ingressClassName: nginx
+  ingressClassName: nginx
 
 # Additional labels for Ingress manifest file
   # labels:
@@ -134,18 +134,18 @@ affinity: {}
 # taint a node with the following command to mark it as not schedulable for new pods
 # kubectl taint nodes <node> sonarqube=true:NoSchedule
 # The following statement will tolerate this taint and as such reverse a node for sonarqube
-tolerations: []
-#  - key: "sonarqube"
-#    operator: "Equal"
-#    value: "true"
-#    effect: "NoSchedule"
+tolerations:
+- key: "sonarqube"
+  operator: "Equal"
+  value: "true"
+  effect: "NoSchedule"
 
 # Node labels for pod assignment
 # Ref: https://kubernetes.io/docs/user-guide/node-selection/
 # add a label to a node with the following command
 # kubectl label node <node> sonarqube=true
-nodeSelector: {}
-#  sonarqube: "true"
+nodeSelector:
+  sonarqube: "true"
 
 # hostAliases allows the modification of the hosts file inside a container
 hostAliases: []
@@ -341,7 +341,7 @@ persistence:
   ##
   storageClass:
   accessMode: ReadWriteOnce
-  size: 5Gi
+  size: 50Gi
   uid: 1000
 
   ## Specify extra volumes. Refer to ".spec.volumes" specification : https://kubernetes.io/fr/docs/concepts/storage/volumes/
@@ -374,9 +374,9 @@ emptyDir: {}
 ## for external Databases
 jdbcOverwrite:
   # If enable the JDBC Overwrite, make sure to set `postgresql.enabled=false`
-  enable: false
+  enable: true
   # The JDBC url of the external DB
-  jdbcUrl: "jdbc:postgresql://myPostgress/myDatabase?socketTimeout=1500"
+  jdbcUrl: "jdbc:postgresql://sonarqube-db-px-04.postgres.database.azure.com:5432/postgres?user=sonarUser&password=sonarPass&sslmode=require"
   # The DB user that should be used for the JDBC connection
   jdbcUsername: "sonarUser"
   # Use this if you don't mind the DB password getting stored in plain text within the values file
@@ -390,7 +390,7 @@ jdbcOverwrite:
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/postgresql/README.md
 postgresql:
   # Enable to deploy the bitnami PostgreSQL chart
-  enabled: true
+  enabled: false
   ## postgresql Chart global settings
   # global:
   #   imageRegistry: ''
@@ -520,4 +520,4 @@ extraConfig:
 # adminJobAnnotations: {}
 # sonarWebContext: /
 
-terminationGracePeriodSeconds: 60
+terminationGracePeriodSeconds: 6
